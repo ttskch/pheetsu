@@ -1,11 +1,13 @@
 {
     "name": "ttskch/pheetsu",
-    "description": "",
+    "description": "PHP library to CRUDify Google Spreadsheets like sheetsu.com",
     "keywords": [
-        "Skeleton",
-        "PSR"
+        "Spreadsheets",
+        "CRUD",
+        "API",
+        "sheetsu"
     ],
-    "homepage": "https://github.com/koriym/Koriym.PhpSkeleton",
+    "homepage": "https://github.com/ttskch/pheetsu",
     "license": "MIT",
     "authors": [
         {
