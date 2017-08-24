@@ -3,9 +3,13 @@
 namespace Ttskch\Pheetsu;
 
 use Ttskch\GoogleSheetsApi\Client;
+use Ttskch\Pheetsu\Service\ColumnNameResolver;
 
 class Pheetsu
 {
+    const MAX_ROW = 9999999;
+    const MAX_COLUMN = 'ZZZ';
+
     /**
      * @var Client
      */
@@ -15,6 +19,11 @@ class Pheetsu
      * @var AuthenticationHelper
      */
     private $authenticationHelper;
+
+    /**
+     * @var ColumnNameResolver
+     */
+    private $columnNameResolver;
 
     /**
      * @var string
@@ -29,13 +38,15 @@ class Pheetsu
     /**
      * @param Client $client
      * @param AuthenticationHelper $authenticationHelper
+     * @param ColumnNameResolver $columnNameResolver
      * @param $spreadsheetId
      * @param $sheetName
      */
-    public function __construct(Client $client, AuthenticationHelper $authenticationHelper, $spreadsheetId, $sheetName)
+    public function __construct(Client $client, AuthenticationHelper $authenticationHelper, ColumnNameResolver $columnNameResolver, $spreadsheetId, $sheetName)
     {
         $this->client = $client;
         $this->authenticationHelper = $authenticationHelper;
+        $this->columnNameResolver = $columnNameResolver;
         $this->spreadsheetId = $spreadsheetId;
         $this->sheetName = $sheetName;
     }
@@ -48,13 +59,27 @@ class Pheetsu
         $this->authenticationHelper->authenticate($forceApprovalPrompt);
     }
 
-    public function read($range)
+    /**
+     * @param int $limit
+     * @param int $offset
+     * @return mixed
+     * @see https://docs.sheetsu.com/?shell#read-all-data
+     */
+    public function read($limit = 0, $offset = 0)
     {
-        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, sprintf('%s!%s', $this->sheetName, $range));
-        $values = $response->getValues();
+        $range = sprintf('%s!A1:%s%s', $this->sheetName, $this->getRightEdgeColumn(), self::MAX_ROW);
+        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
+        $rows = $response->getValues();
 
-        var_dump($values);
-        exit;
+        $keys = array_shift($rows);
+
+        $rows = array_slice($rows, $offset, $limit ?: null);
+
+        foreach ($rows as $i => $row) {
+            $rows[$i] = array_combine($keys, $row);
+        }
+
+        return $rows;
     }
 
     public function search()
@@ -71,5 +96,17 @@ class Pheetsu
 
     public function delete()
     {
+    }
+
+    /**
+     * @return string
+     */
+    private function getRightEdgeColumn()
+    {
+        $range = sprintf('%s!A1:%s1', $this->sheetName, self::MAX_COLUMN);
+        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
+        $values = $response->getValues();
+
+        return $this->columnNameResolver->getName(count($values[0]));
     }
 }

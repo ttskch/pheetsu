@@ -15,4 +15,6 @@ $pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
 
 $pheetsu->authenticate();
 
-$pheetsu->read('A1:C4');
+$rows = $pheetsu->read();
+
+var_dump($rows);

@@ -7,6 +7,7 @@ use Ttskch\GoogleSheetsApi\Factory\ApiClientFactory;
 use Ttskch\GoogleSheetsApi\Factory\GoogleClientFactory;
 use Ttskch\Pheetsu\AuthenticationHelper;
 use Ttskch\Pheetsu\Pheetsu;
+use Ttskch\Pheetsu\Service\ColumnNameResolver;
 
 class PheetsuFactory
 {
@@ -28,7 +29,9 @@ class PheetsuFactory
         $authenticator = new Authenticator($googleClient);
         $authenticationHelper = new AuthenticationHelper($authenticator);
 
-        $pheetsu = new Pheetsu($apiClient, $authenticationHelper, $spreadsheetId, $sheetName);
+        $columnNameResolver = new ColumnNameResolver();
+
+        $pheetsu = new Pheetsu($apiClient, $authenticationHelper, $columnNameResolver, $spreadsheetId, $sheetName);
 
         return $pheetsu;
     }
