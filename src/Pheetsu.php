@@ -82,8 +82,51 @@ class Pheetsu
         return $rows;
     }
 
-    public function search()
+    /**
+     * @param array $query
+     * @param int $limit
+     * @param int $offset
+     * @param bool $ignoreCase
+     * @return array
+     * @see https://docs.sheetsu.com/?shell#search-spreadsheet
+     */
+    public function search(array $query, $limit = 0, $offset = 0, $ignoreCase = false)
     {
+        $rows = [];
+
+        foreach ($this->read() as $row) {
+
+            $matched = false;
+
+            foreach ($query as $queryKey => $queryValue) {
+
+                // if query key doesn't exist do nothing.
+                if (
+                    ($ignoreCase && !array_key_exists(strtolower($queryKey), array_change_key_case($row, CASE_LOWER))) ||
+                    (!$ignoreCase && !isset($row[$queryKey]))
+                ) {
+                    continue;
+                }
+
+                $actualValue = array_change_key_case($row, CASE_LOWER)[strtolower($queryKey)];
+
+                // '*' in query value is a wildcard.
+                if (strpos($queryValue, '*') !== false) {
+                    $queryRegExp = sprintf('/%s/%s', str_replace('*', '.*', str_replace('/', '\/', $queryValue)), $ignoreCase ? 'i' : '');
+                    $matched = preg_match($queryRegExp, $actualValue);
+                } else {
+                    $matched = ($queryValue === $actualValue);
+                }
+            }
+
+            if ($matched) {
+                $rows[] = $row;
+            }
+        }
+
+        $rows = array_slice($rows, $offset, $limit ?: null);
+
+        return $rows;
     }
 
     public function create()

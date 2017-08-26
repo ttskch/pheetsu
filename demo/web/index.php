@@ -16,5 +16,10 @@ $pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
 $pheetsu->authenticate();
 
 $rows = $pheetsu->read();
+var_dump($rows);
 
+$rows = $pheetsu->search([
+    'name' => '*a*',
+    'age' => '1*',
+], 0, 0, true);
 var_dump($rows);
