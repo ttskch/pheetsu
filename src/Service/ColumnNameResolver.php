@@ -4,6 +4,10 @@ namespace Ttskch\Pheetsu\Service;
 
 class ColumnNameResolver
 {
+    /**
+     * @param $number
+     * @return string
+     */
     public function getName($number)
     {
         $digits = [];
@@ -24,8 +28,22 @@ class ColumnNameResolver
         return implode('', array_reverse($digits));
     }
 
+    /**
+     * @param $name
+     * @return int
+     */
     public function getNumber($name)
     {
-        // todo
+        $number = 0;
+
+        $digits = array_reverse(str_split($name));
+
+        $i = 0;
+        foreach ($digits as $digit) {
+            $decimalDigit = ord($digit) - ord('A') + 1;
+            $number += $decimalDigit * (26 ** $i++);
+        }
+
+        return $number;
     }
 }
