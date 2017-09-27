@@ -67,7 +67,7 @@ class Pheetsu
      */
     public function read($limit = 0, $offset = 0)
     {
-        $range = sprintf('%s!A1:%s%s', $this->sheetName, $this->getRightEdgeColumn(), self::MAX_ROW);
+        $range = sprintf('%s!A1:%s%s', $this->sheetName, $this->getLastColumn(), self::MAX_ROW);
         $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
         $rows = $response->getValues();
 
@@ -144,12 +144,24 @@ class Pheetsu
     /**
      * @return string
      */
-    private function getRightEdgeColumn()
+    private function getLastColumn()
     {
         $range = sprintf('%s!A1:%s1', $this->sheetName, self::MAX_COLUMN);
         $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
-        $values = $response->getValues();
+        $rows = $response->getValues();
 
-        return $this->columnNameResolver->getName(count($values[0]));
+        return $this->columnNameResolver->getName(count($rows[0]));
+    }
+
+    /**
+     * @return int
+     */
+    private function getLastRow()
+    {
+        $range = sprintf('%s!A1:%s%s', $this->sheetName, $this->getLastColumn(), self::MAX_ROW);
+        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
+        $rows = $response->getValues();
+
+        return count($rows);
     }
 }
