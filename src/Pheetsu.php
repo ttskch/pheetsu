@@ -3,6 +3,7 @@
 namespace Ttskch\Pheetsu;
 
 use Ttskch\GoogleSheetsApi\Client;
+use Ttskch\Pheetsu\Exception\RuntimeException;
 use Ttskch\Pheetsu\Service\ColumnNameResolver;
 
 class Pheetsu
@@ -36,6 +37,11 @@ class Pheetsu
     private $sheetName;
 
     /**
+     * @var array
+     */
+    private $keys;
+
+    /**
      * @param Client $client
      * @param AuthenticationHelper $authenticationHelper
      * @param ColumnNameResolver $columnNameResolver
@@ -49,6 +55,7 @@ class Pheetsu
         $this->columnNameResolver = $columnNameResolver;
         $this->spreadsheetId = $spreadsheetId;
         $this->sheetName = $sheetName;
+        $this->keys = [];
     }
 
     /**
@@ -129,8 +136,37 @@ class Pheetsu
         return $rows;
     }
 
-    public function create()
+    /**
+     * @param array $rows
+     * @see https://docs.sheetsu.com/?shell#create
+     */
+    public function create(array $rows)
     {
+        if (!is_array(reset($rows))) {
+            $rows = [$rows];
+        }
+
+        $flattenedRows = [];
+
+        foreach ($rows as $row) {
+            $flattenedRows[] = $this->flattenRow($row);
+        }
+
+        $range = sprintf('%s!A1:%s1', $this->sheetName, $this->getLastColumn());
+
+        $valueRange = new \Google_Service_Sheets_ValueRange();
+        $valueRange->setMajorDimension('ROWS');
+        $valueRange->setValues($flattenedRows);
+
+        $params = [
+            'valueInputOption' => 'USER_ENTERED',
+        ];
+
+        /**
+         * @see https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/append
+         * @see https://developers.google.com/sheets/samples/writing
+         */
+        $this->client->getGoogleService()->spreadsheets_values->append($this->spreadsheetId, $range, $valueRange, $params);
     }
 
     public function update()
@@ -139,6 +175,47 @@ class Pheetsu
 
     public function delete()
     {
+    }
+
+    /**
+     * @param array $row
+     * @return array
+     */
+    public function flattenRow(array $row)
+    {
+        $flattened = [];
+
+        foreach ($row as $key => $value) {
+            if (($pos = array_search($key, $this->getKeys())) === false) {
+                throw new RuntimeException('Invalid key in row.');
+            }
+            $flattened[$pos] = $value;
+        }
+        ksort($flattened);
+
+        return array_values($flattened);
+    }
+
+    /**
+     * @return array
+     */
+    public function getKeys()
+    {
+        return $this->keys ?: $this->scanKeys();
+    }
+
+    /**
+     * @return array
+     */
+    public function scanKeys()
+    {
+        $range = sprintf('%s!A1:%s1', $this->sheetName, $this->getLastColumn());
+        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
+        $rows = $response->getValues();
+
+        $this->keys = $rows[0];
+
+        return $this->keys;
     }
 
     /**

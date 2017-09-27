@@ -23,3 +23,11 @@ $rows = $pheetsu->search([
     'age' => '1*',
 ], 0, 0, true);
 var_dump($rows);
+
+$pheetsu->create([
+    'id' => 4,
+    'name' => 'Dave',
+    'age' => 16,
+]);
+$rows = $pheetsu->read();
+var_dump($rows);
