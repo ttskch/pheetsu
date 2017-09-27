@@ -138,6 +138,7 @@ class Pheetsu
 
     /**
      * @param array $rows
+     * @return array
      * @see https://docs.sheetsu.com/?shell#create
      */
     public function create(array $rows)
@@ -167,6 +168,8 @@ class Pheetsu
          * @see https://developers.google.com/sheets/samples/writing
          */
         $this->client->getGoogleService()->spreadsheets_values->append($this->spreadsheetId, $range, $valueRange, $params);
+
+        return $rows;
     }
 
     public function update()
