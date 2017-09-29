@@ -188,15 +188,20 @@ class Pheetsu
      */
     public function update($columnName, $value, array $row, $updateWholeRow = false)
     {
-        $updatedRows = [];
+        $postRows = $updatedRows = [];
 
         foreach ($this->read() as $readRow) {
             if (isset($readRow[$columnName]) && $readRow[$columnName] === $value) {
                 // '' for clear cell, null for skip cell.
-                $updatedRows[] = $this->flattenRow($row, $updateWholeRow ? '' : \Google_Model::NULL_VALUE);
+                $postRows[] = $this->flattenRow($row, $updateWholeRow ? '' : \Google_Model::NULL_VALUE);
+
+                $callback = function ($k) { return in_array($k, $this->getKeys()); };
+                $updatedRows[] = array_filter($row, $callback, ARRAY_FILTER_USE_KEY) + $readRow;
             } else {
                 // [] for skip row.
-                $updatedRows[] = [];
+                $postRows[] = [];
+
+                $updatedRows[] = null;
             }
         }
 
@@ -204,7 +209,7 @@ class Pheetsu
 
         $valueRange = new \Google_Service_Sheets_ValueRange();
         $valueRange->setMajorDimension('ROWS');
-        $valueRange->setValues($updatedRows);
+        $valueRange->setValues($postRows);
 
         $params = [
             'valueInputOption' => 'USER_ENTERED',
@@ -216,7 +221,7 @@ class Pheetsu
          */
         $this->client->getGoogleService()->spreadsheets_values->update($this->spreadsheetId, $range, $valueRange, $params);
 
-        return $row;
+        return array_filter($updatedRows);
     }
 
     public function delete()
