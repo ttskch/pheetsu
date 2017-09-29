@@ -31,3 +31,10 @@ $pheetsu->create([
 ]);
 $rows = $pheetsu->read();
 var_dump($rows);
+
+$pheetsu->update('name', 'Dave', [
+    'id' => 10,
+    'age' => 100,
+]);
+$rows = $pheetsu->read();
+var_dump($rows);

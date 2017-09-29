@@ -42,6 +42,11 @@ class Pheetsu
     private $keys;
 
     /**
+     * @var string
+     */
+    private $lastColumn;
+
+    /**
      * @param Client $client
      * @param AuthenticationHelper $authenticationHelper
      * @param ColumnNameResolver $columnNameResolver
@@ -83,6 +88,7 @@ class Pheetsu
         $rows = array_slice($rows, $offset, $limit ?: null);
 
         foreach ($rows as $i => $row) {
+            $row = array_merge($row, array_fill(0, count($keys) - count($row), ''));
             $rows[$i] = array_combine($keys, $row);
         }
 
@@ -172,8 +178,45 @@ class Pheetsu
         return $rows;
     }
 
-    public function update()
+    /**
+     * @param $columnName
+     * @param $value
+     * @param array $row
+     * @param bool $updateWholeRow
+     * @return array
+     * @see https://docs.sheetsu.com/?shell#update
+     */
+    public function update($columnName, $value, array $row, $updateWholeRow = false)
     {
+        $updatedRows = [];
+
+        foreach ($this->read() as $readRow) {
+            if (isset($readRow[$columnName]) && $readRow[$columnName] === $value) {
+                // '' for clear cell, null for skip cell.
+                $updatedRows[] = $this->flattenRow($row, $updateWholeRow ? '' : \Google_Model::NULL_VALUE);
+            } else {
+                // [] for skip row.
+                $updatedRows[] = [];
+            }
+        }
+
+        $range = sprintf('%s!A2', $this->sheetName);
+
+        $valueRange = new \Google_Service_Sheets_ValueRange();
+        $valueRange->setMajorDimension('ROWS');
+        $valueRange->setValues($updatedRows);
+
+        $params = [
+            'valueInputOption' => 'USER_ENTERED',
+        ];
+
+        /**
+         * @see https://developers.google.com/sheets/api/reference/rest/v4/spreadsheets.values/update
+         * @see https://developers.google.com/sheets/samples/writing
+         */
+        $this->client->getGoogleService()->spreadsheets_values->update($this->spreadsheetId, $range, $valueRange, $params);
+
+        return $row;
     }
 
     public function delete()
@@ -182,21 +225,18 @@ class Pheetsu
 
     /**
      * @param array $row
+     * @param string $padding
      * @return array
      */
-    public function flattenRow(array $row)
+    public function flattenRow(array $row, $padding = '')
     {
         $flattened = [];
 
-        foreach ($row as $key => $value) {
-            if (($pos = array_search($key, $this->getKeys())) === false) {
-                throw new RuntimeException('Invalid key in row.');
-            }
-            $flattened[$pos] = $value;
+        foreach ($this->getKeys() as $key) {
+            $flattened[] = array_key_exists($key, $row) ? $row[$key] : $padding;
         }
-        ksort($flattened);
 
-        return array_values($flattened);
+        return $flattened;
     }
 
     /**
@@ -226,22 +266,20 @@ class Pheetsu
      */
     private function getLastColumn()
     {
+        return $this->lastColumn ?: $this->scanLastColumn();
+    }
+
+    /**
+     * @return string
+     */
+    private function scanLastColumn()
+    {
         $range = sprintf('%s!A1:%s1', $this->sheetName, self::MAX_COLUMN);
         $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
         $rows = $response->getValues();
 
-        return $this->columnNameResolver->getName(count($rows[0]));
-    }
+        $this->lastColumn = $this->columnNameResolver->getName(count($rows[0]));
 
-    /**
-     * @return int
-     */
-    private function getLastRow()
-    {
-        $range = sprintf('%s!A1:%s%s', $this->sheetName, $this->getLastColumn(), self::MAX_ROW);
-        $response = $this->client->getGoogleService()->spreadsheets_values->get($this->spreadsheetId, $range);
-        $rows = $response->getValues();
-
-        return count($rows);
+        return $this->lastColumn;
     }
 }
