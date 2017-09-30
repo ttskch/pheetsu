@@ -37,3 +37,7 @@ $rows = $pheetsu->update('name', 'Dave', [
     'age' => 100,
 ]);
 var_dump($rows);
+
+$pheetsu->delete('name', 'Dave');
+$rows = $pheetsu->read();
+var_dump($rows);

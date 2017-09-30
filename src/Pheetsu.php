@@ -224,8 +224,13 @@ class Pheetsu
         return array_filter($updatedRows);
     }
 
-    public function delete()
+    /**
+     * @param $columnName
+     * @param $value
+     */
+    public function delete($columnName, $value)
     {
+        $this->update($columnName, $value, [], true);
     }
 
     /**
