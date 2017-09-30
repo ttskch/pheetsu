@@ -14,7 +14,11 @@ $ composer require ttskch/pheetsu:@dev
 
 ## Usage
 
-If you have a Google Spreadsheet like [this](https://docs.google.com/spreadsheets/d/1JQkfd3dlyxFRuxIwGPnBnrxS-l-bLVw_BbHskxT9Nj4/edit#gid=0), you can CRUD the spreadsheet via pheetsu so easily like below.
+If you have a Google Spreadsheet like [this](https://docs.google.com/spreadsheets/d/1JQkfd3dlyxFRuxIwGPnBnrxS-l-bLVw_BbHskxT9Nj4/edit#gid=0),
+
+![image](https://user-images.githubusercontent.com/4360663/31042852-2c4fca34-a5ec-11e7-83e0-b048ed3fe3c8.png)
+
+You can CRUD the spreadsheet via pheetsu so easily like below.
 
 ```php
 $pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
