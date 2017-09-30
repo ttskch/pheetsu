@@ -1,5 +1,7 @@
 # Demo
 
+You can run the demo right away :+1:
+
 ## Usage
 
 ```bash

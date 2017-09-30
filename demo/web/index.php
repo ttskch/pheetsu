@@ -15,29 +15,35 @@ $pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
 
 $pheetsu->authenticate();
 
+// read
 $rows = $pheetsu->read();
 var_dump($rows);
 
+// search
 $rows = $pheetsu->search([
     'name' => '*a*',
     'age' => '1*',
 ], 0, 0, true);
 var_dump($rows);
 
+/* demo spreadsheet is read-only for everyone.
+
+// create
 $pheetsu->create([
     'id' => 4,
     'name' => 'Dave',
     'age' => 16,
 ]);
-$rows = $pheetsu->read();
-var_dump($rows);
+var_dump($pheetsu->read());
 
+// update
 $rows = $pheetsu->update('name', 'Dave', [
     'id' => 10,
     'age' => 100,
 ]);
 var_dump($rows);
 
+// delete
 $pheetsu->delete('name', 'Dave');
-$rows = $pheetsu->read();
-var_dump($rows);
+var_dump($pheetsu->read());
+*/
