@@ -1,5 +1,8 @@
 # pheetsu
 
+[![Latest Stable Version](https://poser.pugx.org/ttskch/pheetsu/v/stable)](https://packagist.org/packages/ttskch/pheetsu)
+[![Total Downloads](https://poser.pugx.org/ttskch/pheetsu/downloads)](https://packagist.org/packages/ttskch/pheetsu)
+
 PHP library to CRUDify Google Spreadsheets like [sheetsu.com](https://sheetsu.com).
 
 ## Requirements
