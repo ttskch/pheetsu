@@ -74,6 +74,17 @@ class Pheetsu
     }
 
     /**
+     * @return \Google_Service_Oauth2_Userinfoplus
+     */
+    public function getUserInfo()
+    {
+        $googleClient = $this->client->getGoogleService()->getClient();
+        $oauth = new \Google_Service_Oauth2($googleClient);
+
+        return $oauth->userinfo_v2_me->get();
+    }
+
+    /**
      * @param int $limit
      * @param int $offset
      * @return mixed
