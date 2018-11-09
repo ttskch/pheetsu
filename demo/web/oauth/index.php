@@ -1,9 +1,9 @@
 <?php
-require __DIR__ . '/../../vendor/autoload.php';
+require __DIR__ . '/../../../vendor/autoload.php';
 
-$parameters = require __DIR__ . '/../parameters.php';
+$parameters = require __DIR__ . '/../../parameters.php';
 
-$pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
+$pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::createOAuth(
     $parameters['client_id'],
     $parameters['client_secret'],
     $parameters['redirect_uri'],

@@ -20,9 +20,9 @@ class PheetsuFactory
      * @param $sheetName
      * @return Pheetsu
      */
-    static public function create($clientId, $clientSecret, $redirectUri, $javascriptOrigin, $spreadsheetId, $sheetName)
+    static public function createOAuth($clientId, $clientSecret, $redirectUri, $javascriptOrigin, $spreadsheetId, $sheetName)
     {
-        $googleClient = GoogleClientFactory::create($clientId, $clientSecret, $redirectUri, $javascriptOrigin);
+        $googleClient = GoogleClientFactory::createOauthClient($clientId, $clientSecret, $redirectUri, $javascriptOrigin);
 
         $apiClient = ApiClientFactory::create($googleClient);
 
@@ -31,7 +31,26 @@ class PheetsuFactory
 
         $columnNameResolver = new ColumnNameResolver();
 
-        $pheetsu = new Pheetsu($apiClient, $authenticationHelper, $columnNameResolver, $spreadsheetId, $sheetName);
+        $pheetsu = new Pheetsu($apiClient, $columnNameResolver, $spreadsheetId, $sheetName, $authenticationHelper);
+
+        return $pheetsu;
+    }
+
+    /**
+     * @param $credentialsFilePath
+     * @param $spreadsheetId
+     * @param $sheetName
+     * @return Pheetsu
+     */
+    static public function createServiceAccount($credentialsFilePath, $spreadsheetId, $sheetName)
+    {
+        $googleClient = GoogleClientFactory::createServiceAccountClient($credentialsFilePath);
+
+        $apiClient = ApiClientFactory::create($googleClient);
+
+        $columnNameResolver = new ColumnNameResolver();
+
+        $pheetsu = new Pheetsu($apiClient, $columnNameResolver, $spreadsheetId, $sheetName);
 
         return $pheetsu;
     }

@@ -17,11 +17,6 @@ class Pheetsu
     private $client;
 
     /**
-     * @var AuthenticationHelper
-     */
-    private $authenticationHelper;
-
-    /**
      * @var ColumnNameResolver
      */
     private $columnNameResolver;
@@ -35,6 +30,11 @@ class Pheetsu
      * @var string
      */
     private $sheetName;
+
+    /**
+     * @var AuthenticationHelper
+     */
+    private $authenticationHelper;
 
     /**
      * @var array
@@ -53,14 +53,14 @@ class Pheetsu
      * @param $spreadsheetId
      * @param $sheetName
      */
-    public function __construct(Client $client, AuthenticationHelper $authenticationHelper, ColumnNameResolver $columnNameResolver, $spreadsheetId, $sheetName)
+    public function __construct(Client $client, ColumnNameResolver $columnNameResolver, $spreadsheetId, $sheetName, AuthenticationHelper $authenticationHelper = null)
     {
         $this->client = $client;
-        $this->authenticationHelper = $authenticationHelper;
         $this->columnNameResolver = $columnNameResolver;
         $this->spreadsheetId = $spreadsheetId;
         $this->sheetName = $sheetName;
         $this->keys = [];
+        $this->authenticationHelper = $authenticationHelper;
     }
 
     /**
@@ -68,7 +68,9 @@ class Pheetsu
      */
     public function authenticate($forceApprovalPrompt = false)
     {
-        $this->authenticationHelper->authenticate($forceApprovalPrompt);
+        if ($this->authenticationHelper) {
+            $this->authenticationHelper->authenticate($forceApprovalPrompt);
+        }
     }
 
     /**

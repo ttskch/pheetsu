@@ -23,8 +23,10 @@ If you have a Google Spreadsheet like [this](https://docs.google.com/spreadsheet
 
 You can CRUD the spreadsheet via pheetsu so easily like below.
 
+### Initializing with OAuth2
+
 ```php
-$pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
+$pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::createOAuth(
     'google_oauth2_client_id',
     'google_oauth2_client_secret',
     'google_oauth2_redirect_uri',
@@ -35,7 +37,21 @@ $pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::create(
 
 // authenticate and be authorized with Google OAuth2.
 $pheetsu->authenticate();
+```
 
+### Initializing with Service Account
+
+```php
+$pheetsu = \Ttskch\Pheetsu\Factory\PheetsuFactory::createServiceAccount(
+    '/path/to/your/service-account-credentials.json',
+    '1JQkfd3dlyxFRuxIwGPnBnrxS-l-bLVw_BbHskxT9Nj4', // spreadsheet id
+    'demo' // sheet name
+);
+```
+
+### Using
+
+```
 $rows = $pheetsu->read();
 var_dump($rows);
 
